@@ -1,5 +1,10 @@
 ## 一群社区
 
 ## 资料
-https://spring.io/guides
-https://spring.io/guides/gs/serving-web-content/
+[srpint文档](https://spring.io/guides)
+
+[springWeb文档](https://spring.io/guides/gs/serving-web-content/)
+
+[githubOAuth](https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/)
+
+##流程
