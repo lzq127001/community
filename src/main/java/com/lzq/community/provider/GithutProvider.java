@@ -38,11 +38,11 @@ public class GithutProvider {
                     .url("https://api.github.com/user?access_token=" + accessToken)
                     .build();
         try {
-            System.out.println("将要获取user信息");
+//            System.out.println("将要获取user信息");
             Response response = client.newCall(request).execute();
             String string = response.body().string();
             GithubUser githubUser = JSON.parseObject(string, GithubUser.class);
-            System.out.println("返回user信息");
+//            System.out.println("返回user信息");
             return githubUser;
         } catch (IOException e) {
             e.printStackTrace();
