@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
@@ -56,7 +55,6 @@ public class AuthorizeController {
 
         if(githubUser != null){
             //登录成功，写cookie和session
-
             User user = new User();
             String token = UUID.randomUUID().toString();
             user.setToken(token);
@@ -64,6 +62,7 @@ public class AuthorizeController {
             user.setAccountId(String.valueOf(githubUser.getId()));
             user.setGmtCreate(System.currentTimeMillis());
             user.setGmtModified(user.getGmtCreate());
+            user.setAvatarUrl(githubUser.getAvatarUrl());
             userMapper.insert(user);//将获取的值写入数据库
 
             //客户端创建cookie

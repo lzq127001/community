@@ -1,0 +1,23 @@
+body {
+    background-color: #efefef;
+}
+.main{
+    background-color: white;
+    margin: 30px;
+}
+
+.btn-publish{
+    float: right;
+    margin-bottom: 30px;
+}
+/* 小头像 */
+.media-object{
+    width: 45px;
+    height: 45px;
+}
+/* 浏览次数等小字 */
+.text-desc{
+    font-size: 12px;
+    font-weight: normal;
+    color: #999;
+}
