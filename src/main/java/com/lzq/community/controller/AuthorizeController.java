@@ -5,6 +5,7 @@ import com.lzq.community.dto.GithubUser;
 import com.lzq.community.mapper.UserMapper;
 import com.lzq.community.model.User;
 import com.lzq.community.provider.GithutProvider;
+import com.lzq.community.service.Userservice;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
@@ -23,6 +25,9 @@ public class AuthorizeController {
 
     @Autowired(required = false)
     private UserMapper userMapper;
+
+    @Autowired
+    private Userservice userservice;
 
     @Value("${github.client.id}")
     private String clientId;
@@ -61,11 +66,13 @@ public class AuthorizeController {
             user.setName(githubUser.getName());
             user.setAccountId(String.valueOf(githubUser.getId()));
             user.setGmtCreate(System.currentTimeMillis());
-            user.setGmtModified(user.getGmtCreate());
             user.setAvatarUrl(githubUser.getAvatarUrl());
-            userMapper.insert(user);//将获取的值写入数据库
+            //有可能用户之前登录过
+            userservice.createOrUpdate(user);
 
-            //客户端创建cookie
+
+
+            //客户端创建cookie，并把token令牌放进cookie里。
             response.addCookie(new Cookie("token",token));
 
 //            request.getSession().setAttribute("user", githubUser);
@@ -76,5 +83,19 @@ public class AuthorizeController {
         }
     }
 
+    //退出登录，删除客户端的cookie和服务的session
+    @GetMapping("/logout")
+    public String logout(HttpServletRequest request,
+                         HttpServletResponse response
+                         ){
+        //删除服务端session
+        request.getSession().removeAttribute("user");
+        //删除客户端的cookie
+        Cookie cookie = new Cookie("token", null);
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        return "redirect:/";
+    }
 
 }

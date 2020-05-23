@@ -1,12 +1,15 @@
 package com.lzq.community.controller;
 
+import com.lzq.community.dto.QuestionDTO;
 import com.lzq.community.mapper.QuestionMapper;
 import com.lzq.community.model.Question;
 import com.lzq.community.model.User;
+import com.lzq.community.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -15,8 +18,8 @@ import javax.servlet.http.HttpServletRequest;
 @Controller
 public class PublishController {
 
-    @Autowired(required = false)
-    private QuestionMapper questionMapper;
+    @Autowired
+    private QuestionService questionService;
 
 
     @GetMapping("/publish")
@@ -30,6 +33,7 @@ public class PublishController {
             @RequestParam("title") String title,
             @RequestParam("description") String description,
             @RequestParam("tag") String tag,
+            @RequestParam("qid") Integer qid,
             HttpServletRequest request,
             Model model) {
 
@@ -53,7 +57,7 @@ public class PublishController {
 
 
 
-        //添加了拦截器
+        //添加了拦截器，本来这里是需要验证是否登录的
         User user = (User)request.getSession().getAttribute("user");
         if(user == null){
             model.addAttribute("error","用户未登录");
@@ -66,11 +70,30 @@ public class PublishController {
         question.setDescription(description);
         question.setTag(tag);
         question.setCreator(user.getId());
-        question.setGmtCreate(System.currentTimeMillis());
-        question.setGmtModified(question.getGmtCreate());
-        //将Question类中的信息插入数据库
-        questionMapper.create(question);
+
+        question.setId(qid);//第一次发布的时候是null，点编辑的时候有值
+
+        //将Question类中的信息插入或更新到数据库
+        questionService.createOrUpdate(question);
+
+
         //正常反应：如果发布的问题插入数据库成功，返回首页，看看刚才发布的内容
         return "redirect:/";
+    }
+
+    //点击编辑返回到问题编辑页面
+    @GetMapping("/publish/{qid}")
+    public String edit(@PathVariable("qid") Integer qid,
+                       Model model){
+
+        QuestionDTO question = questionService.getById(qid);
+
+        model.addAttribute("title",question.getTitle());
+        model.addAttribute("description",question.getDescription());
+        model.addAttribute("tag",question.getTag());
+        model.addAttribute("qid",qid);
+
+
+        return "publish";
     }
 }

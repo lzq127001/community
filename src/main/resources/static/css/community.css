@@ -15,6 +15,10 @@ body {
     width: 45px;
     height: 45px;
 }
+.media-body{
+    padding-top: 12px;
+}
+
 /* 浏览次数等小字 */
 .text-desc{
     font-size: 12px;
@@ -23,4 +27,37 @@ body {
 }
 .profile-section{
     margin-top: 15px;
+}
+.community-menu{
+    color: #999;
+    font-size: 13px;
+}
+.jumbotron{
+    margin: 50px;
+}
+
+.comment{
+    margin: 10px 0;
+}
+
+.btn-comment{
+    float:right;
+    margin-bottom: 10px;
+}
+
+.comment-sp{
+    margin-top: 0;
+}
+
+.menu{
+    color: #999;
+    margin-top: 5px;
+}
+.menu .icon{
+    margin-right: 6px;
+    font-size: 15px;
+    cursor: pointer;
+}
+.menu .icon:hover{
+    color: #499ef3;
 }
