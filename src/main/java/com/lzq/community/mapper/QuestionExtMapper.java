@@ -16,4 +16,7 @@ public interface QuestionExtMapper {
 
     int incView(Question record);
     int incCommentCount(Question record);
+
+    //根据question中的id和tags查找（返回除了该id外所有标签相关的列表）
+    List<Question> selectRelated(Question question);
 }

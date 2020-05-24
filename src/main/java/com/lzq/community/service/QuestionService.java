@@ -10,13 +10,16 @@ import com.lzq.community.mapper.UserMapper;
 import com.lzq.community.model.Question;
 import com.lzq.community.model.QuestionExample;
 import com.lzq.community.model.User;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.session.RowBounds;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class QuestionService {
@@ -37,7 +40,9 @@ public class QuestionService {
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         //从question表中取出所有问题列表
         //List<Question> questionList = questionMapper.list(offset,size);
-        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(new QuestionExample(), new RowBounds(offset, size));
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.setOrderByClause("gmt_create desc");
+        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
 
         //新建一个页面DTO类，（包含qusiton+user+页数），准备返回
         PaginationDTO paginationDTO = new PaginationDTO();
@@ -64,10 +69,10 @@ public class QuestionService {
     }
 
     //根据creator选择数据库中的内容，返回该创建者提交的问题列表
-    public PaginationDTO list(Integer userId, Integer page, Integer size) {
+    public PaginationDTO list(Long userId, Integer page, Integer size) {
         //先算偏移量
         Integer offset = size*(page - 1);
-        //一个总的列表，包含question中的所有属性加变量user
+        //一个总的列表，包含question中的所有属性加变量user的列表
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         //从question表中取出所有问题列表
         //List<Question> questionList = questionMapper.listByUserId(userId,offset,size);
@@ -102,7 +107,7 @@ public class QuestionService {
     }
 
     //根据问题id返回 问题+用户 信息
-    public QuestionDTO getById(Integer id) {
+    public QuestionDTO getById(Long id) {
         Question question = questionMapper.selectByPrimaryKey(id);
         if(question == null){
             throw new CustomizeException(CustomizeErrorCode.QUESTION_NOT_FOUND);
@@ -121,7 +126,6 @@ public class QuestionService {
         if(question.getId() == null){//创建提问
             question.setGmtCreate(System.currentTimeMillis());
             question.setGmtModified(question.getGmtCreate());
-
             //不知道为什么默认值是0，存进去却为null
 
             questionMapper.insertSelective(question);
@@ -135,7 +139,7 @@ public class QuestionService {
         }
     }
 
-    public void incView(Integer id) {
+    public void incView(Long id) {
 
         /*//要更新的数据，用updateByExampleSelective语句，有选择的更新，不更的设置null，更新的设置值
         Question question = questionMapper.selectByPrimaryKey(id);
@@ -152,5 +156,32 @@ public class QuestionService {
         question.setId(id);
         question.setViewCount(1);//因为每次递增一个步长
         questionExtMapper.incView(question);
+    }
+
+    /*
+     * 根据queryDTO中的id找到相应问题，得到其标签，再根据标签从数据库中拿到有相同标签的问题列表
+     */
+    public List<QuestionDTO> selectRelated(QuestionDTO queryDTO) {
+        if (StringUtils.isBlank(queryDTO.getTag())) {
+            return new ArrayList<>();
+        }
+        String[] tags = StringUtils.split(queryDTO.getTag(), ",");
+        String regexpTag = Arrays
+                .stream(tags)
+                .filter(StringUtils::isNotBlank)
+                .map(t -> t.replace("+", "").replace("*", "").replace("?", ""))
+                .filter(StringUtils::isNotBlank)
+                .collect(Collectors.joining("|"));
+        Question question = new Question();
+        question.setId(queryDTO.getId());
+        question.setTag(regexpTag);
+
+        List<Question> questions = questionExtMapper.selectRelated(question);
+        List<QuestionDTO> questionDTOS = questions.stream().map(q -> {
+            QuestionDTO questionDTO = new QuestionDTO();
+            BeanUtils.copyProperties(q, questionDTO);
+            return questionDTO;
+        }).collect(Collectors.toList());
+        return questionDTOS;
     }
 }

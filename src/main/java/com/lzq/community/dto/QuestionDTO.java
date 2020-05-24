@@ -6,13 +6,13 @@ import lombok.Data;
 //这个类比model层中的Question类再多一个User变量，因为model中是和数据库关联的，为了规范一点，在这里建
 @Data
 public class QuestionDTO {
-    private Integer id;
+    private Long id;
     private String title;
     private String description;
     private String tag;
     private Long gmtCreate;
     private Long gmtModified;
-    private Integer creator;
+    private Long creator;
     private Integer commentCount;
     private Integer viewCount;
     private Integer likeCount;

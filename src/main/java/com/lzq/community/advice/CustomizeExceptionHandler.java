@@ -25,9 +25,9 @@ public class CustomizeExceptionHandler {
             //返回json
             ResultDTO resultDTO;
             if (e instanceof CustomizeException) {
-                resultDTO = ResultDTO.errorof((CustomizeException)e);
+                resultDTO = ResultDTO.errorOf((CustomizeException)e);
             } else {
-                resultDTO = ResultDTO.errorof(CustomizeErrorCode.SYS_ERROE);
+                resultDTO = ResultDTO.errorOf(CustomizeErrorCode.SYS_ERROE);
             }
             try {
                 response.setContentType("application/json");
