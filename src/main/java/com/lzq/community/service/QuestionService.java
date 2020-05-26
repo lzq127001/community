@@ -2,6 +2,7 @@ package com.lzq.community.service;
 
 import com.lzq.community.dto.PaginationDTO;
 import com.lzq.community.dto.QuestionDTO;
+import com.lzq.community.dto.QuestionQueryDTO;
 import com.lzq.community.exception.CustomizeException;
 import com.lzq.community.exception.CustomizeErrorCode;
 import com.lzq.community.mapper.QuestionExtMapper;
@@ -33,16 +34,48 @@ public class QuestionService {
     @Autowired(required = false)
     private QuestionExtMapper questionExtMapper;
 
-    public PaginationDTO list(Integer page, Integer size) {
+    public PaginationDTO list(String search, Integer page, Integer size) {
+
+        //如果搜索关键词不为空，利用正则匹配的办法从数据库中查找问题标题
+        if (StringUtils.isNotBlank(search)) {
+            String[] tags = StringUtils.split(search, " ");
+            search = Arrays
+                    .stream(tags)
+                    .filter(StringUtils::isNotBlank)
+                    .map(t -> t.replace("+", "").replace("*", "").replace("?", ""))
+                    .filter(StringUtils::isNotBlank)
+                    .collect(Collectors.joining("|"));
+        }
+
+        Integer totalPage;
+        //Integer totalCount = questionMapper.count();
+        QuestionQueryDTO questionQueryDTO = new QuestionQueryDTO();
+        questionQueryDTO.setSearch(search);
+        Integer totalCount = questionExtMapper.countBySearch(questionQueryDTO);
+
+        if (totalCount % size == 0) {
+            totalPage = totalCount / size;
+        } else {
+            totalPage = totalCount / size + 1;
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+        if (page > totalPage) {
+            page = totalPage;
+        }
+
+
         //先算偏移量(开始的位置)
         Integer offset = size*(page - 1);
         //一个总的列表，包含question中的所有属性加变量user
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         //从question表中取出所有问题列表
         //List<Question> questionList = questionMapper.list(offset,size);
-        QuestionExample questionExample = new QuestionExample();
-        questionExample.setOrderByClause("gmt_create desc");
-        List<Question> questionList = questionMapper.selectByExampleWithRowbounds(questionExample, new RowBounds(offset, size));
+        questionQueryDTO.setSize(size);
+        questionQueryDTO.setPage(offset);
+        List<Question> questionList = questionExtMapper.selectBySearch(questionQueryDTO);
 
         //新建一个页面DTO类，（包含qusiton+user+页数），准备返回
         PaginationDTO paginationDTO = new PaginationDTO();
@@ -58,11 +91,10 @@ public class QuestionService {
         }
 
         //将数值添加到页面pagination中
-        paginationDTO.setQuestions(questionDTOList);
-        //Integer totalCount = questionMapper.count();
-        Integer totalCount = (int)questionMapper.countByExample(new QuestionExample());
+        paginationDTO.setData(questionDTOList);
 
-        paginationDTO.setPagination(totalCount, page, size);
+
+        paginationDTO.setPagination(totalPage, page);
 
 
         return paginationDTO;
@@ -94,13 +126,30 @@ public class QuestionService {
         }
 
         //将数值添加到页面pagination中
-        paginationDTO.setQuestions(questionDTOList);
+        paginationDTO.setData(questionDTOList);
+
+        Integer totalPage;
+
         //Integer totalCount = questionMapper.countByUserId(userId);
         QuestionExample questionExample = new QuestionExample();
         questionExample.createCriteria().andCreatorEqualTo(userId);
         Integer totalCount = (int)questionMapper.countByExample(questionExample);
 
-        paginationDTO.setPagination(totalCount, page, size);
+
+        if (totalCount % size == 0) {
+            totalPage = totalCount / size;
+        } else {
+            totalPage = totalCount / size + 1;
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+        if (page > totalPage) {
+            page = totalPage;
+        }
+
+        paginationDTO.setPagination(totalPage, page);
 
 
         return paginationDTO;

@@ -3,6 +3,7 @@ package com.lzq.community.interceptor;
 import com.lzq.community.mapper.UserMapper;
 import com.lzq.community.model.User;
 import com.lzq.community.model.UserExample;
+import com.lzq.community.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -23,6 +24,9 @@ public class SessionInterceptor implements HandlerInterceptor {
     @Autowired(required = false)
     private UserMapper userMapper;
 
+    @Autowired(required = false)
+    private NotificationService notificationService;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         Cookie[] cookies = request.getCookies();
@@ -38,6 +42,10 @@ public class SessionInterceptor implements HandlerInterceptor {
                     if (users.size() != 0) {
                         System.out.println("（这是再拦截器里）通过token从数据库获取的user信息不为空，在服务器端建立session");
                         request.getSession().setAttribute("user", users.get(0));
+
+                        //如果用户不为空，立马从页面上显示这个用户的回复通知
+                        Long unreadCount = notificationService.unreadCount(users.get(0).getId());
+                        request.getSession().setAttribute("unreadCount",unreadCount);
                     }
                     break;
                 }

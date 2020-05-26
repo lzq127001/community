@@ -1,5 +1,7 @@
 package com.lzq.community.mapper;
 
+import com.lzq.community.dto.QuestionDTO;
+import com.lzq.community.dto.QuestionQueryDTO;
 import com.lzq.community.model.Question;
 import com.lzq.community.model.QuestionExample;
 import org.apache.ibatis.annotations.Param;
@@ -19,4 +21,9 @@ public interface QuestionExtMapper {
 
     //根据question中的id和tags查找（返回除了该id外所有标签相关的列表）
     List<Question> selectRelated(Question question);
+
+    //根据搜索关键字查找标题
+    Integer countBySearch(QuestionQueryDTO questionQueryDTO);
+
+    List<Question> selectBySearch(QuestionQueryDTO questionQueryDTO);
 }

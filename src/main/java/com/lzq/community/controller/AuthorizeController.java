@@ -6,6 +6,7 @@ import com.lzq.community.mapper.UserMapper;
 import com.lzq.community.model.User;
 import com.lzq.community.provider.GithutProvider;
 import com.lzq.community.service.Userservice;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
@@ -18,13 +19,12 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.UUID;
 
 @Controller
+@Slf4j
 public class AuthorizeController {
 
     @Autowired
     private GithutProvider githutProvider;
 
-    @Autowired(required = false)
-    private UserMapper userMapper;
 
     @Autowired
     private Userservice userservice;
@@ -78,6 +78,9 @@ public class AuthorizeController {
 //            request.getSession().setAttribute("user", githubUser);
             return "redirect:/";
         }else {
+            //追加日志--例子
+            log.error("callback get github error {}",githubUser);
+
             //登录失败
             return "redirect:/";
         }
