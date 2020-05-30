@@ -9,6 +9,11 @@
 
 ##流程
 mvn flyway:migrate
+
 mvn flyway:repair
+
 mvn clean compile flyway:migrate
+
 mvn -Dmybatis.generator.overwrite=true mybatis-generator:generate
+
+java -jar -Dspring.profiles.active=production target/community-0.0.1-SNAPSHOT.jar
