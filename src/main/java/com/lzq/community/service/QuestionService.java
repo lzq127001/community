@@ -68,7 +68,7 @@ public class QuestionService {
 
 
         //先算偏移量(开始的位置)
-        Integer offset = size*(page - 1);
+        Integer offset = page < 1 ? 0 : size*(page - 1);
         //一个总的列表，包含question中的所有属性加变量user
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         //从question表中取出所有问题列表
@@ -102,8 +102,30 @@ public class QuestionService {
 
     //根据creator选择数据库中的内容，返回该创建者提交的问题列表
     public PaginationDTO list(Long userId, Integer page, Integer size) {
+
+        Integer totalPage;
+
+        //Integer totalCount = questionMapper.countByUserId(userId);
+        QuestionExample questionExample = new QuestionExample();
+        questionExample.createCriteria().andCreatorEqualTo(userId);
+        Integer totalCount = (int)questionMapper.countByExample(questionExample);
+
+
+        if (totalCount % size == 0) {
+            totalPage = totalCount / size;
+        } else {
+            totalPage = totalCount / size + 1;
+        }
+
+        if (page < 1) {
+            page = 1;
+        }
+        if (page > totalPage) {
+            page = totalPage;
+        }
+
         //先算偏移量
-        Integer offset = size*(page - 1);
+        Integer offset = page < 1 ? 0 : size*(page - 1);
         //一个总的列表，包含question中的所有属性加变量user的列表
         List<QuestionDTO> questionDTOList = new ArrayList<>();
         //从question表中取出所有问题列表
@@ -128,26 +150,7 @@ public class QuestionService {
         //将数值添加到页面pagination中
         paginationDTO.setData(questionDTOList);
 
-        Integer totalPage;
 
-        //Integer totalCount = questionMapper.countByUserId(userId);
-        QuestionExample questionExample = new QuestionExample();
-        questionExample.createCriteria().andCreatorEqualTo(userId);
-        Integer totalCount = (int)questionMapper.countByExample(questionExample);
-
-
-        if (totalCount % size == 0) {
-            totalPage = totalCount / size;
-        } else {
-            totalPage = totalCount / size + 1;
-        }
-
-        if (page < 1) {
-            page = 1;
-        }
-        if (page > totalPage) {
-            page = totalPage;
-        }
 
         paginationDTO.setPagination(totalPage, page);
 

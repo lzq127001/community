@@ -9,4 +9,6 @@
 
 ##流程
 mvn flyway:migrate
+mvn flyway:repair
+mvn clean compile flyway:migrate
 mvn -Dmybatis.generator.overwrite=true mybatis-generator:generate
