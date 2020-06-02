@@ -45,7 +45,15 @@ body {
     padding-left: 0;
 }
 .question-wechat {
-    width: 80%;
+    width: 60%;
+}
+
+.side-name{
+    margin-top: 20px;
+}
+.nav-title-icon {
+    width: 30px;
+    height: 30px;
 }
 
 .publish-tag-tab {
