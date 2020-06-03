@@ -2,6 +2,8 @@ package com.lzq.community.controller;
 
 import com.lzq.community.dto.AccessTokenDTO;
 import com.lzq.community.dto.GithubUser;
+import com.lzq.community.exception.CustomizeErrorCode;
+import com.lzq.community.exception.CustomizeException;
 import com.lzq.community.mapper.UserMapper;
 import com.lzq.community.model.User;
 import com.lzq.community.provider.GithutProvider;
@@ -10,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -40,7 +43,8 @@ public class AuthorizeController {
     @GetMapping("/callback")
     public String callback(@RequestParam(name = "code") String code,
                            @RequestParam(name = "state") String state,
-                           HttpServletResponse response){
+                           HttpServletResponse response,
+                           Model model){
         //获取accesstoken需要的参数
         AccessTokenDTO accessTokenDTO = new AccessTokenDTO();
 
@@ -53,8 +57,16 @@ public class AuthorizeController {
         String accessToken = githutProvider.getAccessToken(accessTokenDTO);
         //通过获取的accesstoken去github获取用户信息
         GithubUser githubUser = githutProvider.getUser(accessToken);
-        if(githubUser == null)
+
+//        if(true){
+//            throw new CustomizeException(CustomizeErrorCode.GITHUB_RETURN_NULL);//Test
+//        }
+
+        if(githubUser == null){
             System.out.println("从github接口获取到的用户信息为空");
+            throw new CustomizeException(CustomizeErrorCode.GITHUB_RETURN_NULL);
+        }
+
         System.out.println("登录账户id：" + githubUser.getId());
         System.out.println("名字：" + githubUser.getName());
 

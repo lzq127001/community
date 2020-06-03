@@ -43,6 +43,8 @@ public class CustomizeExceptionHandler {
         }else {
             //错误页面跳转
             if (e instanceof CustomizeException) {
+                if(((CustomizeException) e).getCode() == 2013)//如果抛出的异常是github的问题
+                    model.addAttribute("githubError","Github服务器繁忙");
                 model.addAttribute("message", e.getMessage());
             } else {
                 model.addAttribute("message", CustomizeErrorCode.SYS_ERROE.getMessage());

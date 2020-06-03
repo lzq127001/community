@@ -12,9 +12,14 @@
 <body>
 <div th:insert="~{navigation.html :: nav}"></div>
 <div class="jumbotron">
-    <h1>出错啦</h1>
+    <h1 th:if="${githubError} eq null">出错啦</h1>
+    <h2 th:text="${githubError}">出错啦</h2>
+
     <p th:text="${message}">服务太热啦，稍等下再试试~</p>
-    <p><a class="btn btn-primary btn-lg" href="/" role="button">返回首页</a></p>
+
+    <p><a class="btn btn-primary btn-lg" href="/" role="button">返回首页</a>
+    </p>
+
 </div>
 
 </body>
